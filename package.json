@@ -1,0 +1,25 @@
+{
+  "name": "streamzback",
+  "version": "1.0.0",
+  "description": "StreamzBack",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Asmaudhian/StreamzBack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Asmaudhian/StreamzBack/issues"
+  },
+  "homepage": "https://github.com/Asmaudhian/StreamzBack#readme",
+  "dependencies": {
+    "@mixer/client-node": "^3.5.0",
+    "express": "^4.17.1",
+    "googleapis": "^45.0.0",
+    "isomorphic-unfetch": "^3.0.0"
+  }
+}
