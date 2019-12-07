@@ -4,7 +4,13 @@ const apiKeys = require('./apiKey.js')
 const fetch = require('isomorphic-unfetch')
 const Mixer = require('@mixer/client-node')
 const clientMixer = new Mixer.Client(new Mixer.DefaultRequestRunner())
-const {google} = require('googleapis')
+const { google } = require('googleapis')
+
+// const youtube = google.youtube({
+//     version: 'v3',
+//     auth: apiKeys.youtube
+//  });
+
 
 clientMixer.use(new Mixer.OAuthProvider(clientMixer, {
     clientId: apiKeys.mixer
@@ -30,27 +36,21 @@ async function getMixerBaseData() {
 }
 
 async function getYouTubeBaseData() {
-    var service = google.youtube('v3');
-    service.liveStreams.list({
-        auth: apiKeys.youtube,
-        part: 'snippet,contentDetails,statistics',
-        forUsername: 'GoogleDevelopers'
-    }, function (err, response) {
-        if (err) {
-            console.log('The API returned an error: ' + err);
-            return;
-        }
-        var channels = response.data.items;
-        if (channels.length == 0) {
-            console.log('No channel found.');
-        } else {
-            console.log('This channel\'s ID is %s. Its title is \'%s\', and ' +
-                'it has %s views.',
-                channels[0].id,
-                channels[0].snippet.title,
-                channels[0].statistics.viewCount);
-        }
-    });
+    console.log('https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&viewCount=desc&type=video&key=' + apiKeys.youtube)
+    let result = await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&type=video&key=' + apiKeys.youtube)
+    let resultJson = await result.json()
+    console.log(resultJson)
+    // youtube.search.list({
+    //     part: 'snippet',
+    //     q: 'PewDiePie'
+    //   }, function (err, data) {
+    //     if (err) {
+    //       console.error('Error: ' + err);
+    //     }
+    //     if (data) {
+    //       console.log(data)
+    //     }
+    //   });
 }
 
 async function getTwitchBaseData() {
