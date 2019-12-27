@@ -26,6 +26,14 @@ app.get('/kek', function (req, res) {
     res.send('Hello World! kek')
 })
 
+app.get('/auth/twitch', async function (req, res) {
+    let userAccess = await fetch('https://id.twitch.tv/oauth2/token?client_id=' + apiKeys.twitch + '&client_secret=' + apiKeys.secretTwitch + '&code=' + req.query.code + '&grant_type=authorization_code&redirect_uri=http://localhost:3000/auth/twitch', {
+        method: "POST"
+    })
+    let userAccessJson = await userAccess.json();
+    res.json(userAccessJson)
+})
+
 async function getMixerBaseData() {
     let games = await clientMixer.request('GET', 'types', {
         qs: {
@@ -68,6 +76,6 @@ async function getTwitchBaseData() {
     return gamesJson
 }
 
-app.listen(3000, function () {
-    console.log('Example app listening on port 3000!')
+app.listen(3030, function () {
+    console.log('Example app listening on port 3030!')
 })
