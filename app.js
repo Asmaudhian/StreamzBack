@@ -31,8 +31,14 @@ app.get('/topgames', async function (req, res) {
 
 app.get('/topgames/:offset', async function (req, res) {
     let offset = req.params.offset
-    if ((offset % 100) === 0){
-        if (Date.now() - data.topgames[offset].timestamp > 30000){
+    if ((offset % 100) === 0) {
+        if (data.topgames[offset] === undefined) {
+            data.topgames[offset] = {
+                data: [],
+                timestamp: 0
+            }
+        }
+        if (Date.now() - data.topgames[offset].timestamp > 30000) {
             console.log('GENERATING NEW DATA')
             let twitchData = await getTwitchBaseData(offset)
             res.json(twitchData)
@@ -44,6 +50,31 @@ app.get('/topgames/:offset', async function (req, res) {
         res.send('ERROR IN OFFSET NUMBER')
     }
 })
+
+function checkTopGames(offset) {
+    let offsetArray = Object.keys(data.topgames)
+    // for (let newGame of data.topgames[offset].data){
+    for (let i = 0; i < data.topgames[offset].data.length; i++) {
+        let newGame = data.topgames[offset].data[i]
+        for (let oldOffsets of offsetArray) {
+            if (oldOffsets !== offset) {
+                // for (let oldGame of data.topgames[oldOffsets].data) {
+                for (let j = 0; j < data.topgames[oldOffsets].data.length; j++) {
+                    let oldGame = data.topgames[oldOffsets].data[j]
+                    // console.log(oldGame.game._id)
+                    if (newGame.game._id === oldGame.game._id) {
+                        console.log("GAME MOVED POSITION !")
+                        if (data.topgames[offset].timestamp > data.topgames[oldOffsets].timestamp) {
+                            data.topgames[oldOffsets].data.splice(j, 1)
+                        } else {
+                            data.topgames[offset].data.splice(i, 1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 async function getTwitchBaseData(offset) {
     let games = await fetch('https://api.twitch.tv/kraken/games/top?limit=100&offset=' + offset + '&client_id=' + apiKeys.twitch,
@@ -57,15 +88,10 @@ async function getTwitchBaseData(offset) {
             cache: 'default'
         });
     let gamesJson = await games.json()
-    if (data.topgames[offset] === undefined){
-        data.topgames[offset] = {
-            data: [],
-            timestamp: 0
-        }
-    }
+
     data.topgames[offset].data = gamesJson.top;
     data.topgames[offset].timestamp = Date.now();
-
+    checkTopGames(offset)
     return data.topgames[offset]
 }
 
