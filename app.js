@@ -6,12 +6,14 @@ const fetch = require('isomorphic-unfetch')
 const Mixer = require('@mixer/client-node')
 const clientMixer = new Mixer.Client(new Mixer.DefaultRequestRunner())
 const { google } = require('googleapis')
+const cors = require('cors')
 
 // const youtube = google.youtube({
 //     version: 'v3',
 //     auth: apiKeys.youtube
 //  });
 
+app.use(cors())
 
 clientMixer.use(new Mixer.OAuthProvider(clientMixer, {
     clientId: apiKeys.mixer
@@ -24,10 +26,10 @@ app.get('/', async function (req, res) {
     res.json(twitchData)
 })
 
-app.get('/topgames', async function (req, res) {
-    let twitchData = await getTwitchBaseData(0)
-    res.json(twitchData)
-})
+// app.get('/topgames', async function (req, res) {
+//     let twitchData = await getTwitchBaseData(0)
+//     res.json(twitchData)
+// })
 
 app.get('/topgames/:offset', async function (req, res) {
     let offset = req.params.offset
@@ -53,21 +55,24 @@ app.get('/topgames/:offset', async function (req, res) {
 
 function checkTopGames(offset) {
     let offsetArray = Object.keys(data.topgames)
-    // for (let newGame of data.topgames[offset].data){
     for (let i = 0; i < data.topgames[offset].data.length; i++) {
         let newGame = data.topgames[offset].data[i]
         for (let oldOffsets of offsetArray) {
-            if (oldOffsets !== offset) {
-                // for (let oldGame of data.topgames[oldOffsets].data) {
+            if (parseInt(oldOffsets) !== parseInt(offset)) {
+                // console.log(oldOffsets, "oldoffset")
+                // console.log(offset, "offset")
                 for (let j = 0; j < data.topgames[oldOffsets].data.length; j++) {
                     let oldGame = data.topgames[oldOffsets].data[j]
-                    // console.log(oldGame.game._id)
                     if (newGame.game._id === oldGame.game._id) {
-                        console.log("GAME MOVED POSITION !")
+                        console.log(newGame.game.name ," MOVED POSITION !")
                         if (data.topgames[offset].timestamp > data.topgames[oldOffsets].timestamp) {
                             data.topgames[oldOffsets].data.splice(j, 1)
+                            console.log(data.topgames[oldOffsets].data.splice(j, 1))
+                            console.log('cut from offset: ', oldOffsets)
                         } else {
                             data.topgames[offset].data.splice(i, 1)
+                            console.log(data.topgames[offset].data.splice(i, 1))
+                            console.log('cut from offset: ', offset)
                         }
                     }
                 }

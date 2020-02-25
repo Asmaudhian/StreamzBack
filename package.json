@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Asmaudhian/StreamzBack#readme",
   "dependencies": {
     "@mixer/client-node": "^3.5.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "googleapis": "^45.0.0",
     "isomorphic-unfetch": "^3.0.0"
