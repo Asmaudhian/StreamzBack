@@ -53,38 +53,36 @@ app.get('/topgames/:offset', async function (req, res) {
     }
 })
 
-function checkTopGames(offset) {
-    let offsetArray = Object.keys(data.topgames)
-    for (let i = 0; i < data.topgames[offset].data.length; i++) {
-        let newGame = data.topgames[offset].data[i]
-        for (let oldOffsets of offsetArray) {
-            if (parseInt(oldOffsets) !== parseInt(offset)) {
-                // console.log(oldOffsets, "oldoffset")
-                // console.log(offset, "offset")
-                for (let j = 0; j < data.topgames[oldOffsets].data.length; j++) {
-                    let oldGame = data.topgames[oldOffsets].data[j]
-                    if (newGame.game._id === oldGame.game._id) {
-                        console.log(newGame.game.name + ' == ' + oldGame.game.name ," MOVED POSITION !")
-                        if (data.topgames[offset].timestamp > data.topgames[oldOffsets].timestamp) {
-                            console.log(data.topgames[oldOffsets].data[j])
-                            data.topgames[oldOffsets].data = data.topgames[oldOffsets].data.splice(j, 1)
-                            // console.log(data.topgames[oldOffsets].data.splice(j, 1))
-                            // console.log('cut from offset: ', oldOffsets)
-                            // console.log('index: ', j)
+// function checkTopGames(offset) {
+//     let offsetArray = Object.keys(data.topgames)
+//     for (let i = 0; i < data.topgames[offset].data.length; i++) {
+//         let newGame = data.topgames[offset].data[i]
+//         for (let oldOffsets of offsetArray) {
+//             if (parseInt(oldOffsets) !== parseInt(offset)) {
+//                 // console.log(oldOffsets, "oldoffset")
+//                 // console.log(offset, "offset")
+//                 for (let j = 0; j < data.topgames[oldOffsets].data.length; j++) {
+//                     let oldGame = data.topgames[oldOffsets].data[j]
+//                     if (newGame.game._id === oldGame.game._id) {
+//                         console.log(newGame.game.name + ' == ' + oldGame.game.name ," MOVED POSITION !")
+//                         if (data.topgames[offset].timestamp > data.topgames[oldOffsets].timestamp) {
+//                             console.log(data.topgames[oldOffsets].data[j])
+//                             data.topgames[oldOffsets].data.splice(j, 1)
+//                             // console.log('cut from offset: ', oldOffsets)
+//                             // console.log('index: ', j)
                             
-                        } else {
-                            console.log(data.topgames[offset].data[i])
-                            data.topgames[offset].data = data.topgames[offset].data.splice(i, 1)
-                            // console.log(data.topgames[offset].data.splice(i, 1))
-                            // console.log('cut from offset: ', offset)
-                            // console.log('index: ', i)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+//                         } else {
+//                             console.log(data.topgames[offset].data[i])
+//                             data.topgames[offset].data.splice(i, 1)
+//                             // console.log('cut from offset: ', offset)
+//                             // console.log('index: ', i)
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 async function getTwitchBaseData(offset) {
     let games = await fetch('https://api.twitch.tv/kraken/games/top?limit=100&offset=' + offset + '&client_id=' + apiKeys.twitch,
@@ -101,7 +99,7 @@ async function getTwitchBaseData(offset) {
 
     data.topgames[offset].data = gamesJson.top;
     data.topgames[offset].timestamp = Date.now();
-    checkTopGames(offset)
+    // checkTopGames(offset)
     return data.topgames[offset]
 }
 
