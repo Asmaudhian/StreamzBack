@@ -53,6 +53,35 @@ app.get('/topgames/:offset', async function (req, res) {
     }
 })
 
+app.get('/streams', async function (req, res) {
+    let offset = req.query.offset
+    let gameId = req.query.gameId
+    let token = req.query.token
+    if (offset !== undefined && gameId !== undefined && (parseInt(offset) % 100) === 0) {
+        if (data.streams[gameId] === undefined) {
+            data.streams[gameId] = {}
+        }
+        if (data.streams[gameId][offset] === undefined) {
+            data.streams[gameId][offset] = {
+                data: [],
+                timestamp: 0,
+                cursor: ''
+            }
+        }
+        if (Date.now() - data.streams[gameId][offset].timestamp > 30000) {
+            console.log('GENERATING NEW DATA')
+            let streamsData = await getStreamPage(offset, gameId, token)
+            res.json(streamsData)
+        } else {
+            console.log('DATA ALREADY STORED')
+            res.json(data.streams[gameId][offset])
+        }
+    } else {
+        res.send('Parameter missing/wrong')
+    }
+
+})
+
 // function checkTopGames(offset) {
 //     let offsetArray = Object.keys(data.topgames)
 //     for (let i = 0; i < data.topgames[offset].data.length; i++) {
@@ -70,7 +99,7 @@ app.get('/topgames/:offset', async function (req, res) {
 //                             data.topgames[oldOffsets].data.splice(j, 1)
 //                             // console.log('cut from offset: ', oldOffsets)
 //                             // console.log('index: ', j)
-                            
+
 //                         } else {
 //                             console.log(data.topgames[offset].data[i])
 //                             data.topgames[offset].data.splice(i, 1)
@@ -83,6 +112,42 @@ app.get('/topgames/:offset', async function (req, res) {
 //         }
 //     }
 // }
+
+function generateStreamUrl(offset, gameId, token) {
+    let url = 'https://api.twitch.tv/helix/streams?first=100'
+    url += '&game_id=' + gameId
+    if (parseInt(offset) !== 0) {
+        url += '&after=' + data.streams[gameId][parseInt(offset) - 100].cursor
+    }
+    url += '&client_id='
+    if (token !== undefined) {
+        url += token
+    } else {
+        url += apiKeys.twitch
+    }
+    return url
+}
+
+async function getStreamPage(offset, gameId, token) {
+    let url = generateStreamUrl(offset, gameId, token)
+    console.log(url)
+    let streams = await fetch(url,
+        {
+            method: 'GET',
+            headers: {
+                'Client-ID': (token !== undefined) ? token : apiKeys.twitch,
+                'Accept': 'application/vnd.twitchtv.v5+json'
+            },
+            mode: 'cors',
+            cache: 'default'
+        });
+    let streamsJson = await streams.json();
+    console.log(streamsJson)
+    data.streams[gameId][offset].data = streamsJson.data;
+    data.streams[gameId][offset].timestamp = Date.now();
+    data.streams[gameId][offset].cursor = streamsJson.pagination.cursor;
+    return data.streams[gameId][offset]
+}
 
 async function getTwitchBaseData(offset) {
     let games = await fetch('https://api.twitch.tv/kraken/games/top?limit=100&offset=' + offset + '&client_id=' + apiKeys.twitch,
