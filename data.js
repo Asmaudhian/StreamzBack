@@ -6,11 +6,13 @@ var topgames = {
 }
 
 var streams = {
-    0: {
-        data: [],
-        timestamp: 0,
-        cursor: ''
-    }
+   0: {
+       0: {
+           data: [],
+           timestamp: 0,
+           cursor: ''
+       }
+   }
 }
 
 module.exports.topgames = topgames
